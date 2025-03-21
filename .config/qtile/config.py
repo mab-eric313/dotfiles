@@ -24,11 +24,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from libqtile import bar, layout, qtile, widget, hook
+from libqtile import bar, layout, qtile, widget, hook, config
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
-import psutil, os, subprocess
+import psutil, os, subprocess, mypy
 
 # Autostart
 @hook.subscribe.startup
@@ -36,6 +36,8 @@ def autostart():
     home = os.path.expanduser("~/.config/qtile/autostart.sh")
     subprocess.Popen([home])
 
+# @hook.subscribe.client_new
+    
 mod = "mod4"
 terminal = guess_terminal()
 
@@ -43,19 +45,14 @@ terminal = guess_terminal()
 def powermenu(qtile):
     subprocess.run(["bash ~/.config/rofi/powermenu/type-1/powermenu.sh"], shell=True)
 def rofi(qtile):
-    subprocess.run(["bash ~/.config/rofi/launchers/type-1/launcher.sh"], shell=True)
+    subprocess.run(["bash ~/.config/rofi/launchers/type-2/launcher.sh"], shell=True)
 
 keys = [
     # A list of available commands that can be bound to keys can be found
     # at https://docs.qtile.org/en/latest/manual/config/lazy.html
     # Switch between windows
-    # Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
-    # Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
-    # Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
-    # Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
-    # Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window"),
-    Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
-    Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
+    Key([mod], "h", lazy.group.prev_window(), lazy.window.bring_to_front(), desc="Move focus to previous window"),
+    Key([mod], "l", lazy.group.next_window(), lazy.window.bring_to_front(), desc="Move focus to next window"),
     Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
     Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
     Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window"),
@@ -76,12 +73,12 @@ keys = [
     # Split = all windows displayed
     # Unsplit = 1 window displayed, like Max layout, but still with
     # multiple stack panes
-    Key(
-        [mod, "shift"],
-        "Return",
-        lazy.layout.toggle_split(),
-        desc="Toggle between split and unsplit sides of stack",
-    ),
+    # Key(
+    #     [mod, "shift"],
+    #     "Return",
+    #     lazy.layout.toggle_split(),
+    #     desc="Toggle between split and unsplit sides of stack",
+    # ),
     Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
     # Toggle between different layouts as defined below
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
@@ -104,6 +101,7 @@ keys = [
 
     # Applications
     Key([mod, "shift"], "d", lazy.function(rofi), desc="Launch Rofi drun"),
+    Key([mod, "shift"], "Return", lazy.spawn("thunar"), desc="Launch Thunar File Manager"),
 
     # Powermenu
     Key([mod, "shift"], "q", lazy.function(powermenu), desc="Launch Rofi powermenu"),
@@ -176,7 +174,7 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font="monospace",
+    font="Hack Nerd Font",
     fontsize=12,
     padding=3,
 )
@@ -280,9 +278,9 @@ mouse = [
 ]
 
 dgroups_key_binder = None
-dgroups_app_rules = []  # type: list
+dgroups_app_rules = []  # type: listthesis ')' does not match opening parenthesis '[' on line 52
 follow_mouse_focus = True
-bring_front_click = False
+bring_front_click = True
 floats_kept_above = True
 cursor_warp = False
 floating_layout = layout.Floating(
@@ -290,11 +288,13 @@ floating_layout = layout.Floating(
     border_focus='#90b262',
     float_rules=[
         # Run the utility of `xprop` to see the wm class and name of an X client.
+        # use 'xprop | grep WM_CLASS'
         *layout.Floating.default_float_rules,
         Match(wm_class="confirmreset"),  # gitk
         Match(wm_class="makebranch"),  # gitk
         Match(wm_class="maketag"),  # gitk
         Match(wm_class="ssh-askpass"),  # ssh-askpass
+        Match(wm_class="com-abdownloadmanager-desktop-AppKt"),
         Match(title="branchdialog"),  # gitk
         Match(title="pinentry"),  # GPG key password entry
     ]

@@ -6,15 +6,16 @@
 " PLUGINS ---------------------------------------------------------------- {{{
 
 call plug#begin('~/.vim/plugged')
-
+" 
 Plug 'prabirshrestha/vim-lsp'
-"Plug 'mattn/vim-lsp-settings'
-
+Plug 'mattn/vim-lsp-settings'
+" Plug 'sheerun/vim-polyglot'
+" 
 call plug#end()
 
 " }}}
 
-
+" CONFIGURATION ------------------------------------------------------------- {{{
 set nocompatible 	" Disable compatibility with vi
 filetype on 		" Enable type file detection
 filetype plugin on 	" Enable plugins and load plugin for the detected file type
@@ -41,12 +42,26 @@ set wildmode=list:longest " Make wildmenu behave like similar to Bash completion
 " set wildignore=*.docx,*.jpg,*.png,*.gif,*.pdf,*.pyc,*.exe,*.flv,*.img,*.xlsx " Wildmenu will ignore files with these extensions.
 set mouse=a
 set clipboard=unnamedplus
-color desert
+color slate
+set splitright
+set shell=zsh
+set signcolumn=no
 
+" augroup CursorLine
+"   au!
+"   au VimEnter,WinEnter,BufWinEnter * setlocal nocursorline
+"   au WinLeave * setlocal nocursorline
+" augroup END
 
+hi Folded term=standout ctermfg=4 ctermbg=None guifg=DarkBlue guibg=LightGrey
+" hi Cursorline ctermfg=None ctermbg=None
+hi Visual ctermbg=darkgray
+
+" }}}
 
 " MAPPINGS --------------------------------------------------------------- {{{
 
+" See :help key-notation 
 nnoremap <ESC> <ESC> :nohlsearch<CR>
 
 " You can split the window in Vim by typing :split or :vsplit.
@@ -63,7 +78,6 @@ noremap <c-down> <c-w>-
 noremap <c-left> <c-w><
 noremap <c-right> <c-w>>
 " }}}
-
 
 " VIMSCRIPT -------------------------------------------------------------- {{{
 if executable('pylsp')
@@ -116,19 +130,21 @@ augroup cursor_off
     autocmd WinEnter * set cursorline 
 augroup END
 
-fun! GitBranch(file)
-    let l:dir = fnamemodify(system('readlink -f ' . a:file), ':h')
-    let l:cmd = 'git -C ' . l:dir . ' branch --show-current 2>/dev/null'
-    let b:git_current_branch = trim(system(l:cmd))
-endfun
+let g:lsp_diagnostics_enabled = 0
+let g:lsp_document_highlight_enabled = 0
 
-augroup GitBranch
-    autocmd!
-    autocmd BufEnter,ShellCmdPost,FileChangedShellPost * call GitBranch(expand('%'))
-augroup END
+" fun! GitBranch(file)
+"     let l:dir = fnamemodify(system('readlink -f ' . a:file), ':h')
+"     let l:cmd = 'git -C ' . l:dir . ' branch --show-current 2>/dev/null'
+"     let b:git_current_branch = trim(system(l:cmd))
+" endfun
+" 
+" augroup GitBranch
+"     autocmd!
+"     autocmd BufEnter,ShellCmdPost,FileChangedShellPost * call GitBranch(expand('%'))
+" augroup END
 
 " }}}
-
 
 " STATUS LINE ------------------------------------------------------------ {{{
 
@@ -136,8 +152,8 @@ augroup END
 set statusline=
 
 " Status line left side.
-"set statusline+=%{StatuslineGit()}
-set statusline+=\ %{b:git_current_branch}\ %F\ %M\ %Y\ %R
+" set statusline+=%{StatuslineGit()}
+" set statusline+=\ %{b:git_current_branch}\ %F\ %M\ %Y\ %R
 
 " Use a divider to separate the left side from the right side.
 set statusline+=%=
