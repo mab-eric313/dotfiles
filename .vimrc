@@ -22,6 +22,7 @@ filetype plugin on 	" Enable plugins and load plugin for the detected file type
 filetype indent on 	" Load an indent file for the detected file type
 syntax on 		" Turn syntax highlighting on
 set number 		" Add numbers to each line on the left-hand side
+set statusline+=%=
 set cursorline 		" Highlight cursor line underneath the cursor horizontally
 set shiftwidth=4	" Set shift width to 4 spaces
 set tabstop=4 		" Set tab width to 4 columns
@@ -46,6 +47,7 @@ color slate
 set splitright
 set shell=zsh
 set signcolumn=no
+set noshowmode
 
 " augroup CursorLine
 "   au!
@@ -148,18 +150,46 @@ let g:lsp_document_highlight_enabled = 0
 
 " STATUS LINE ------------------------------------------------------------ {{{
 
+let g:currentmode={
+	\'n': 'NORMAL',
+	\'i': 'INSERT',
+	\'v': 'VISUAL',
+	\'V': 'VISUAL-LINE',
+	\"\<C-V>": 'VISUAL-BLOCK',
+	\'R': 'REPLACE',
+	\'c': 'COMMAND',
+	\'t': 'TERMINAL'
+	\}
+
+function! GitBranch()
+  return system("git rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n'")
+endfunction
+
+function! StatuslineGit()
+  let l:branchname = GitBranch()
+  return strlen(l:branchname) > 0?'['.l:branchname.']':''
+endfunction
+
 " Clear status line when vimrc is reloaded.
 set statusline=
 
-" Status line left side.
-" set statusline+=%{StatuslineGit()}
-" set statusline+=\ %{b:git_current_branch}\ %F\ %M\ %Y\ %R
+" %#ModeMsg#				change to ModeMsg color
+" %{g:currentmode[mode()]}	show current mode
+" %#StatusLine#				change to StatusLine color
+" %f						path file in current directory
+" %m						modified flag [+] [-]
+" %r						readonly flag [RO]
+" %y						[filetype]
+set statusline+=%#ModeMsg#\ %{g:currentmode[mode()]}\ %#StatusLine#\ %f\ %m\ %r\ %y\ 
 
 " Use a divider to separate the left side from the right side.
 set statusline+=%=
 
 " Status line right side.
-set statusline+=\ row:\ %l\ col:\ %c\ percent:\ %p%%
+" %{StatuslineGit()}		statusline git [master]
+" %l						line number
+" %p%%				 		percentage file in lines
+set statusline+=\ %#PmenuSel#\ %{StatuslineGit()}\ %l\:\%c\ \ %p%%
 
 " Show the status on the second to last line.
 set laststatus=2
