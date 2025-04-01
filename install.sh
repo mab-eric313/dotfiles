@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Update package list and install essential packages
-sudo apt update && sudo apt install -y git wget rsync zsh vim curl
-
 # Install oh-my-zsh
 sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
