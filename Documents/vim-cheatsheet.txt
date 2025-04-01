@@ -1,0 +1,41 @@
+:so %	-		reloading vim script while editing
+:cd		-		change directory
+:e		-		edit file
+:new	-		Create new window
+:vnew	-		Create new window vertically
+:vert	-		Open Vertically window
+:hor	-		Open Horizontally window
+:3		-		Go to line 3
+:%s/foo/bar/g	Search and replace, (%) is a range the entire file, (foo) is want to replace, (bar) is replace with bar, (g) is from the first to the last line of the file
+
+-- NAVIGATION --
+|WINDOW|
+H		-		(H)igh:		Move to top screen
+M		-		(M)iddle:	Move to middle screen
+L		-		(L)ow:		Move to bottom screen
+gg		-		Move to beginning of file
+G		-		Move to end of file
+
+|WORDS|
+b / w	-		Previous/next word
+ge / e	-		Previous/next end of word
+viw		-		Select word (visual inside word)
+
+-- Editing --
+|VISUAL MODE|
+vU		-		Enter visual mode and change selected words to uppercase
+vu		-		Enter visual mode and change selected words to lowercase
+
+|NORMAL MODE|
+P		-		Paste before the cursor
+p		-		Paster after the cursor
+d		-		Cut/delete
+D		- 		Delete the characters under cursor until EOL
+y		-		Copy/Yank
+"+y		- 		Copy/Yank to system clipboard 
+				(": register 
+				 +: system clipboard
+				 y: copy/yank)
+f-		-		find next "-" 
+w		-		move to next word
+%		-		jump to matching brackets example: (hello world)
