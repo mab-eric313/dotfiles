@@ -1,12 +1,9 @@
-" Minimalist .vimrc with LSP and lightweight diagnostics (gutter + echo only)
-
 call plug#begin('~/.vim/plugged')
 
 " Plugins
 Plug 'prabirshrestha/vim-lsp'
-Plug 'prabirshrestha/asyncomplete.vim'
-Plug 'prabirshrestha/asyncomplete-lsp.vim'
-Plug 'preservim/nerdtree'
+" Plug 'prabirshrestha/asyncomplete.vim'
+" Plug 'prabirshrestha/asyncomplete-lsp.vim'
 
 call plug#end()
 
@@ -16,11 +13,11 @@ set nocompatible
 filetype plugin indent on
 syntax on
 set number
+set relativenumber
 set shiftwidth=4
 set tabstop=4
 set encoding=utf-8
 set completeopt=menuone,noinsert,noselect
-set statusline=%f\ %y\ %m\ %r%=%l\:%c\ %p%%
 set laststatus=2
 set clipboard=unnamedplus
 set mouse=a
@@ -28,11 +25,15 @@ set splitright
 set splitbelow
 set wildmenu
 set wildmode=list:longest
+color slate
 if executable('zsh')
 	set shell=zsh
 else
 	set shell=bash
 endif
+
+" Configure Netrw
+let g:netrw_bufsettings = 'noma nomod relativenumber nobl nowrap ro'
 
 " SEARCH ---------------------------------------------------------------------
 set incsearch
@@ -51,24 +52,36 @@ noremap <c-up> <c-w>+
 noremap <c-down> <c-w>-
 noremap <c-left> <c-w><
 noremap <c-right> <c-w>>
+nnoremap <leader><tab> :tabNext<CR>
+nnoremap <leader><S-tab> :tabprevious<CR>
+nnoremap <leader>b :Rexplore<CR>
+
+
 
 " ASYNCOMPLETE ---------------------------------------------------------------
-let g:asyncomplete_auto_popup = 1
-let g:asyncomplete_auto_completeopt = 1
+" let g:asyncomplete_auto_popup = 1
+" let g:asyncomplete_auto_completeopt = 1
+" let g:asyncomplete_min_chars = 4
+" let g:asyncomplete_refresh_delay = 200
 
 inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-inoremap <expr> <CR>    pumvisible() ? asyncomplete#close_popup() : "\<CR>"
-
+" inoremap <expr> <CR>    pumvisible() ? asyncomplete#close_popup() : "\<CR>"
+"
 " VIM-LSP --------------------------------------------------------------------
+let g:lsp_log_verbose = 1
+let g:lsp_log_file = expand('$HOME/.vim/vim-lsp.log')
 
 if executable('clangd')
-    au User lsp_setup call lsp#register_server({
+  au User lsp_setup call lsp#register_server({
         \ 'name': 'clangd',
-        \ 'cmd': ['clangd', '--background-index=false', '--clang-tidy=false'],
-        \ 'whitelist': ['c', 'cpp'],
+        \ 'cmd': {server_info->['clangd']},
+        \ 'allowlist': ['c', 'cpp'],
+        \ 'root_uri': {server_info->lsp#utils#path_to_uri(expand('%:p:h'))},
         \ })
 endif
+
+autocmd FileType c,cpp setlocal omnifunc=lsp#complete
 
 if executable('pylsp')
     au User lsp_setup call lsp#register_server({
@@ -93,30 +106,21 @@ augroup lsp_setup
     autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
 augroup END
 
-" NerdTree
-nnoremap <leader>n :NERDTreeFocus<CR>
-nnoremap <C-n> :NERDTree<CR>
-nnoremap <C-t> :NERDTreeToggle<CR>
-nnoremap <C-f> :NERDTreeFind<CR>
-
-" ENABLE ONLY GUTTER AND ECHO DIAGNOSTIC -------------------------------------
+" LSP -------------------------------------
 set signcolumn=yes
 let g:lsp_diagnostics_enabled = 1
+let g:lsp_diagnostics_delay = 100
 let g:lsp_diagnostics_virtual_text_enabled = 0
 let g:lsp_diagnostics_signs_enabled = 1
 let g:lsp_diagnostics_echo_cursor = 1
-
-" Optional: Disable ALE entirely if installed
-let g:ale_enabled = 0
+let g:lsp_document_highlight_enabled = 1
+let g:lsp_code_lens_enabled = 0
+let g:lsp_signature_help_enabled = 0
 
 " UI FIXES -------------------------------------------------------------------
-" Gutter (signcolumn) background sama seperti normal background
-set fillchars=vert:\│
-
 highlight VertSplit guifg=#aaaaaa guibg=NONE ctermfg=0 ctermbg=white
 highlight SignColumn guibg=NONE ctermbg=NONE
 
-" Hindari highlight putih pada simbol LSP (seperti variabel)
 highlight LspReference ctermfg=white guifg=#000000 ctermbg=darkgray guibg=#444444
 highlight Search term=reverse ctermfg=0 ctermbg=11 guibg=Yellow
 
@@ -135,12 +139,12 @@ let g:currentmode={
 " Clear status line when vimrc is reloaded.
 set statusline=
 
-set statusline+=%#ModeMsg#\ %{g:currentmode[mode()]}\ %#StatusLine#\ %f\ %m\ %r\ %y\ 
+set statusline+=%#ModeMsg#\ %{g:currentmode[mode()]}\ %#StatusLine#\ %t\ %m\ %r\ %y\ 
 
 " Use a divider to separate the left side from the right side.
 set statusline+=%=
 
-set statusline+=\ %#PmenuSel#\ %l\:\%c\ \ %p%%
+set statusline+=\ %#PmenuSel#\ cur:\%l\|\last:\%L\ %p%%
 
 " Show the status on the second to last line.
 set laststatus=2

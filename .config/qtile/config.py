@@ -28,8 +28,11 @@ from libqtile import bar, layout, qtile, widget, hook, config
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
-from types import FunctionType
-import psutil, os, subprocess, mypy
+# from types import FunctionType
+import os
+import subprocess
+#import mypy
+#import psutil
 
 # Autostart
 @hook.subscribe.startup_once
@@ -38,22 +41,41 @@ def autostart():
     subprocess.Popen([home], shell=True)
 
 # @hook.subscribe.client_new
-    
+# def floating_to_front(window):
+#     if window.floating:
+#         window.bring_to_front()
+#         window.focus(warp=True)
+
+
+@hook.subscribe.client_new
+def make_everything_floating(window):
+    def _bring_to_front():
+        group = window.group
+        if group and group.layout.__class__.__name__.lower() == "floating":
+            window.floating = True
+            window.bring_to_front()
+            window.focus(warp=True)
+
+    qtile.call_later(0.1, _bring_to_front)
+
+
 mod = "mod4"
-terminal = guess_terminal()
+terminal = "alacritty"
+
 
 # Functions
 def powermenu(qtile):
     subprocess.run(["bash ~/.config/rofi/powermenu/type-1/powermenu.sh"], shell=True)
 def rofi(qtile):
-    subprocess.run(["bash ~/.config/rofi/launchers/type-2/launcher.sh"], shell=True)
+    # subprocess.run(["bash ~/.config/rofi/launchers/type-2/launcher.sh"], shell=True)
+    subprocess.run (["rofi -show drun"], shell=True)
 
 keys = [
     # A list of available commands that can be bound to keys can be found
     # at https://docs.qtile.org/en/latest/manual/config/lazy.html
     # Switch between windows
-    Key([mod], "h", lazy.group.prev_window(), lazy.window.bring_to_front(), desc="Move focus to previous window"),
-    Key([mod], "l", lazy.group.next_window(), lazy.window.bring_to_front(), desc="Move focus to next window"),
+    Key([mod], "h", lazy.group.next_window(), lazy.window.bring_to_front(), desc="Move focus to previous window"),
+    Key([mod], "l", lazy.group.prev_window(), lazy.window.bring_to_front(), desc="Move focus to next window"),
     Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
     Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
     Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window"),
@@ -102,7 +124,7 @@ keys = [
 
     # Applications
     Key([mod, "shift"], "d", lazy.function(rofi), desc="Launch Rofi drun"),
-    Key([mod, "shift"], "Return", lazy.spawn("thunar"), desc="Launch Thunar File Manager"),
+    Key([mod, "shift"], "Return", lazy.spawn("thunar"), desc="Launch thunar File Manager"),
 
     # Powermenu
     Key([mod, "shift"], "q", lazy.function(powermenu), desc="Launch Rofi powermenu"),
@@ -150,19 +172,37 @@ for i in groups:
 
 layouts = [
     layout.Columns(
-        border_focus_stack=["#d75f5f", "#8f3d3d"], 
-        border_focus=["#90b262"], 
-        border_width=2, 
+        border_normal='#000',
+        border_focus_stack=["#d75f5f", "#8f3d3d"],
+        border_focus=["#90b262"],
+        border_width=3,
         margin=8,
         ),
     layout.Max(),
     # Try more layouts by unleashing below layouts.
     # layout.Stack(num_stacks=2),
     layout.Bsp(
-        border_focus_stack=["#d75f5f", "#8f3d3d"], 
-        border_focus=["#90b262"], 
-        border_width=2, 
+        border_focus_stack=["#d75f5f", "#8f3d3d"],
+        border_focus=["#90b262"],
+        border_width=3,
         margin=8,
+        ),
+
+    layout.Floating(
+        border_width=2,
+        border_focus='#90b262',
+        float_rules=[
+            # Run the utility of `xprop` to see the wm class and name of an X client.
+            # use 'xprop | grep WM_CLASS'
+            *layout.Floating.default_float_rules,
+            Match(wm_class="confirmreset"),  # gitk
+            Match(wm_class="makebranch"),  # gitk
+            Match(wm_class="maketag"),  # gitk
+            Match(wm_class="ssh-askpass"),  # ssh-askpass
+            Match(wm_class="com-abdownloadmanager-desktop-AppKt"),
+            Match(title="branchdialog"),  # gitk
+            Match(title="pinentry"),  # GPG key password entry
+        ]
         ),
     # layout.Matrix(),
     # layout.MonadTall(),
@@ -205,7 +245,7 @@ screens = [
                 widget.CurrentLayout(),
                 widget.GroupBox(highlight_method='line'),
                 widget.Prompt(),
-                #widget.WindowName(),
+                # widget.WindowName(),
                 widget.Spacer(),
                 widget.Chord(
                     chords_colors={
@@ -213,8 +253,8 @@ screens = [
                     },
                     name_transform=lambda name: name.upper(),
                 ),
-                #widget.TextBox("default config", name="default"),
-                #widget.TextBox("&lt;M-r&gt; to spawn", foreground="#d75f5f"),
+                # widget.TextBox("default config", name="default"),
+                # widget.TextBox("&lt;M-r&gt; to spawn", foreground="#d75f5f"),
                 widget.Sep(),
                 widget.CapsNumLockIndicator(),
                 widget.Sep(),
@@ -284,22 +324,22 @@ follow_mouse_focus = True
 bring_front_click = True
 floats_kept_above = True
 cursor_warp = False
-floating_layout = layout.Floating(
-    border_width=2,
-    border_focus='#90b262',
-    float_rules=[
-        # Run the utility of `xprop` to see the wm class and name of an X client.
-        # use 'xprop | grep WM_CLASS'
-        *layout.Floating.default_float_rules,
-        Match(wm_class="confirmreset"),  # gitk
-        Match(wm_class="makebranch"),  # gitk
-        Match(wm_class="maketag"),  # gitk
-        Match(wm_class="ssh-askpass"),  # ssh-askpass
-        Match(wm_class="com-abdownloadmanager-desktop-AppKt"),
-        Match(title="branchdialog"),  # gitk
-        Match(title="pinentry"),  # GPG key password entry
-    ]
-)
+# floating_layout = layout.Floating(
+#     border_width=2,
+#     border_focus='#90b262',
+#     float_rules=[
+#         # Run the utility of `xprop` to see the wm class and name of an X client.
+#         # use 'xprop | grep WM_CLASS'
+#         *layout.Floating.default_float_rules,
+#         Match(wm_class="confirmreset"),  # gitk
+#         Match(wm_class="makebranch"),  # gitk
+#         Match(wm_class="maketag"),  # gitk
+#         Match(wm_class="ssh-askpass"),  # ssh-askpass
+#         Match(wm_class="com-abdownloadmanager-desktop-AppKt"),
+#         Match(title="branchdialog"),  # gitk
+#         Match(title="pinentry"),  # GPG key password entry
+#     ]
+# )
 auto_fullscreen = True
 focus_on_window_activation = "smart"
 reconfigure_screens = True
