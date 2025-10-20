@@ -11,5 +11,5 @@ cd dotfiles
 ./install.sh
 ```
 
-![my-desktop-setup](https://github.com/user-attachments/assets/f4fa6cf9-90c8-47ab-9e7c-84da06de45e7)
-![my-desktop-setup(2)](https://github.com/user-attachments/assets/6c2d3bf0-83cc-44a5-98f4-4ad803653645)
+<img width="1366" height="768" alt="Screenshot_2025-10-20_10-31-34" src="https://github.com/user-attachments/assets/865eeacc-6f3a-41fd-8bbb-aeafe54ce7ec" />
+<img width="1366" height="768" alt="Screenshot_2025-10-20_10-36-48" src="https://github.com/user-attachments/assets/c0013ce4-2977-46ed-b61a-bbf78a1ec1f8" />
